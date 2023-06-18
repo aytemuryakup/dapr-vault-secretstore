@@ -1,18 +1,20 @@
-FROM mcr.io/dotnet/aspnet:6.0.9-alpine3.16 AS base
+FROM golang:1.19-alpine AS base
+RUN apk add curl \
+    && mkdir /app
 WORKDIR /app
-EXPOSE 80
 
-FROM mcr.io/dotnet/sdk:6.0.401-bullseye-slim AS build
+FROM golang:1.19-alpine AS build
+RUN mkdir /src
+ADD . /src
 WORKDIR /src
-COPY . .
-RUN dotnet restore --no-cache "./DaprSecretLab.csproj"
-
-RUN dotnet build "./DaprSecretLab.csproj" -c Release --no-restore -o /app/build
+RUN go mod init main
+RUN go mod tidy
 
 FROM build AS publish
-RUN dotnet publish "./DaprSecretLab.csproj" -c Release --no-restore -o /app/publish
+RUN go build -o main .
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "DaprSecretLab.dll"]
+COPY --from=publish /src/* ./
+
+CMD ["/app/main"]

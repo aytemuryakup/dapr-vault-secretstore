@@ -1,0 +1,43 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: vault-secretstore-lab
+  namespace: ob-apps
+  labels:
+    dapr: vault-lab
+    devops: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dapr: vault-lab
+  template:
+    metadata:
+      labels:
+        dapr: vault-lab
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "vault-secretstore-lab"
+        dapr.io/app-port: "3000"
+        dapr.io/sidecar-memory-limit: "250Mi"
+        dapr.io/sidecar-cpu-limit: "200m"
+        dapr.io/log-level: "debug"
+    spec:
+      serviceAccountName: vault-admin
+      containers:
+        - name: vaultsecretstore
+          image: go-lab:1.5
+          imagePullPolicy: IfNotPresent
+          # command: 
+          # - /bin/sh
+          # - -c
+          # - curl http://localhost:3500/v1.0/secrets/vault-lab/do-not-use-vault-token
+          ports:
+          - containerPort: 3000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 750Mi
