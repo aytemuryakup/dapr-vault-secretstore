@@ -10,7 +10,7 @@
 ## Run the app on Kubernetes
 
 Dapr and Vault Kubernetes architecture of our application
-![GitHub Image](/img/arch.png)
+![GitHub Image](/img/arch.jpg)
 
 ### Install Dapr
 
