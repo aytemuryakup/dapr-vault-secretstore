@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vault-secretstore-lab
-  namespace: ob-apps
+  namespace: dapr-vault-lab
   labels:
     dapr: vault-lab
     devops: test
@@ -22,16 +22,30 @@ spec:
         dapr.io/sidecar-memory-limit: "250Mi"
         dapr.io/sidecar-cpu-limit: "200m"
         dapr.io/log-level: "debug"
+        dapr.io/volume-mounts: vault-client-token:/tmp/vault
     spec:
-      serviceAccountName: vault-admin
+      serviceAccountName: dapr-vault-admin
+      initContainers:
+        - name: vault-agent-init-api
+          image: vault:1.13.3
+          imagePullPolicy: IfNotPresent
+          args:
+            - agent
+            - '-config=/etc/vault/vault-agent-config.hcl'
+            - '-log-level=debug'
+          env:
+            - name: VAULT_ADDR
+              value: http://vault-internal.dapr-vault:8200
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/vault
+              name: vault-auth-config
+            - mountPath: /tmp/vault
+              name: vault-client-token
       containers:
         - name: vaultsecretstore
-          image: go-lab:1.5
+          image: aytemur44/dapr-vault-secretlab:1.1
           imagePullPolicy: IfNotPresent
-          # command: 
-          # - /bin/sh
-          # - -c
-          # - curl http://localhost:3500/v1.0/secrets/vault-lab/do-not-use-vault-token
           ports:
           - containerPort: 3000
           resources:
@@ -41,3 +55,13 @@ spec:
             limits:
               cpu: 500m
               memory: 750Mi
+      volumes:
+        - name: vault-auth-config
+          configMap:
+            defaultMode: 420
+            items:
+              - key: vault-agent-config.hcl
+                path: vault-agent-config.hcl
+            name: dapr-vault-access-config
+        - name: vault-client-token
+          emptyDir: {}

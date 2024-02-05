@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dapr-vault-access-config
+  namespace: dapr-vault-lab
+data:
+  vault-agent-config.hcl: |-
+    exit_after_auth = true
+    pid_file = "/tmp/vault/pidfile"
+
+    auto_auth {
+      method "kubernetes" {
+        mount_path = "auth/dapr-vault-agent-method"
+        config = {
+          role = "dapr-vault-agent-role"
+        }
+      }
+
+      sink "file" {
+        config = {
+          path = "/tmp/vault/.vault-token"
+          mode = 0644
+        }
+      }
+    }

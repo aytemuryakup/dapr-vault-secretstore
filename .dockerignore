@@ -1,0 +1,12 @@
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/charts
+**/docker-compose*
+**/Dockerfile*
+**/components
+**/k8s
+**/vault-settings-config
+LICENSE
+README.md
