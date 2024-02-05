@@ -4,11 +4,15 @@
 
 - [Hashicorp Vault](https://developer.hashicorp.com/vault/docs/platform/k8s/helm)
 - [Kubernetes](https://kubernetes.io/docs/setup/) minikube can be used
+- [Dapr](https://docs.dapr.io/)
 
 
 ## Run the app on Kubernetes
 
-## Install Dapr
+Dapr and Vault Kubernetes architecture of our application
+![GitHub Image](/img/arch.png)
+
+### Install Dapr
 
 ```bash
 kubectl create ns dapr-vault
@@ -25,7 +29,7 @@ helm upgrade --install dapr dapr/dapr \
 kubectl get pods --namespace dapr-vault
 ```
 
-## Install Vault
+### Install Vault
 ```bash
 # Add Hashicorp Vault Repo
 helm repo add hashicorp https://helm.releases.hashicorp.com
@@ -41,7 +45,7 @@ helm upgrade --install vault hashicorp/vault \
 kubectl get pods --namespace dapr-vault
 ```
 
-### Configure Vault
+#### Initialize and Unseal Vault
 ```bash
 # Initialize Vault Server
 kubectl exec -n dapr-vault --stdin=true --tty=true vault-0 -- vault operator init
@@ -50,8 +54,4 @@ kubectl exec -n dapr-vault --stdin=true --tty=true vault-0 -- vault operator ini
 kubectl exec -n dapr-vault --stdin=true --tty=true vault-0 -- vault operator unseal # key-1
 kubectl exec -n dapr-vault --stdin=true --tty=true vault-0 -- vault operator unseal # key-2
 kubectl exec -n dapr-vault --stdin=true --tty=true vault-0 -- vault operator unseal # key-3
-
-vault login
-vault secrets enable -path=secret kv-v2
-vault kv put secret/dapr/go-secret-lab/do-not-use-vault-token do-not-use-vault-token="nice work!!!"
 ```

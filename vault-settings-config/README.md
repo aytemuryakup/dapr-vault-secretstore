@@ -5,6 +5,9 @@
 kubectl exec -n dapr-vault --stdin=true --tty=true vault-0 -- /bin/sh
 vault login # with token
 
+vault secrets enable -path=secret kv-v2
+vault kv put secret/dapr/go-secret-lab/do-not-use-vault-token do-not-use-vault-token="nice work!!!"
+
 # we deploy vault read and list policy to vault.
 
 vault policy write dapr-vault-read-token-policy - << EOF
@@ -21,7 +24,10 @@ EOF
 vault auth enable -path=dapr-vault-agent-method kubernetes
 
 # We write vault auth method.
-vault write auth/dapr-vault-agent-method/config kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+vault write auth/dapr-vault-agent-method/config \
+      kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
+      token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+      kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 
 
 # We are writing role for vault auth method.
